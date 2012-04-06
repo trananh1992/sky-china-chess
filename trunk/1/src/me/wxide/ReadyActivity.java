@@ -36,28 +36,28 @@ public class ReadyActivity extends AbsActivity {
 			try {
 				if(server==null||server.isClosed())	server=new ServerSocket(PORT);
 	
-				client=server.accept();
-				String msg=getMsg();
-				if(msg.equals("JOIN")){
-					String ss="RED";
-					if(redSide)	{
-						ss="BLK";
-					}
-					if(!sendMsg(ss)){
-						Log.v("MERROR","sendMsg ERROR!");
+				while(true){
+					client=server.accept();
+					String msg=getMsg();
+					if(msg.equals("JOIN")){	//加入游戏
+						String ss="RED";
+						if(redSide)	{
+							ss="BLK";
+						}
+						sendMsg(ss);
 						
+						targetIp=client.getInetAddress().getHostAddress();
+						
+						Message message=Message.obtain();
+						message.obj=MES_SETOTHER;
+						handle.sendMessage(message);
+						break;	//跳出	循环				
+					}//JOIN
+					if(msg.equals("ASK")){
+						sendMsg("OPEN");
 					}
 					
-					targetIp=client.getInetAddress().getHostAddress();
-					Message message=Message.obtain();
-					message.obj=MES_SETOTHER;
-					handle.sendMessage(message);
-					
-					//setOtherSide(targetIp);
-					Log.v("target", targetIp);
-					
-					
-				}//JOIN
+				}
 				
 						
 			} catch (IOException e) {
