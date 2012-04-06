@@ -13,14 +13,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+	
+
+
+
+
+
 
 public class JoinActivity extends AbsActivity {
 
 	private Handler handle;
 	private EditText et01;
-	private Button bt1;
-	protected final static String MES_SET_CONN="SUCCESS CONNECT TARGET";
-	protected final static String START_GAME="START_GAME";
+	private Button bt1,bt2;
+	private ScanThread scan;
+	private TextView tv1;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -36,7 +43,7 @@ public class JoinActivity extends AbsActivity {
 				if(message.equals(MES_SET_CONN)){
 				bt1.setText("已连接，等待开始");
 				 }
-				if(message.equals(START_GAME)){
+				if(message.equals(MES_START_GAME)){
 				startGame();
 				}
 				
@@ -46,6 +53,9 @@ public class JoinActivity extends AbsActivity {
 		};
 		
 	}
+	
+	
+	
 	private void initClient(){
 		new Thread(new Runnable(){
 		
@@ -80,7 +90,7 @@ public class JoinActivity extends AbsActivity {
 							redSide=true;
 							Log.v("SUCC", "RED");
 							Message message=Message.obtain();
-							message.obj=START_GAME;
+							message.obj=MES_START_GAME;
 							handle.sendMessage(message);
 						}
 						else if(msg.equals("BLK")){
@@ -88,7 +98,7 @@ public class JoinActivity extends AbsActivity {
 							redSide=false;
 							
 							Message message=Message.obtain();
-							message.obj=START_GAME;
+							message.obj=MES_START_GAME;
 							handle.sendMessage(message);
 							
 						}else{
@@ -127,17 +137,55 @@ public class JoinActivity extends AbsActivity {
 	//init set widget listen
 	private void initListen(){
 		bt1=(Button) this.findViewById(R.id.button1);
-	
+		bt2=(Button) this.findViewById(R.id.button2);
 		et01=(EditText)this.findViewById(R.id.editText1);
+		tv1=(TextView) this.findViewById(R.id.textView1);
 
 	bt1.setOnClickListener(new View.OnClickListener() {
 		
 		@Override
 		public void onClick(View arg0) {
+			if(isCorrectIp(et01.getText().toString())){	//检测ip
+				targetIp=et01.getText().toString();
+				Log.v("SET", targetIp);
+				initClient();	
+			}else{
 			// TODO Auto-generated method stub
-			targetIp=et01.getText().toString();
-			Log.v("SET", targetIp);
-			initClient();
+			ShowMsg("请输入正确的ip地址.");
+			}
+		}
+	});
+	
+	bt2.setOnClickListener(new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			
+			StringBuilder sb=new StringBuilder(100);
+			scan=new ScanThread();
+			//progessDialog();
+			scan.start();
+	while(true){
+				
+				try {
+					Thread.sleep(300);
+					if(!scan.isAlive()){
+						for(int i=0;i<scan.list.size();i++){
+							
+							sb.append(scan.list.get(i));
+							sb.append("\n");
+						}
+						tv1.setText(sb.toString());
+						
+					}
+					
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 		}
 	});
 	

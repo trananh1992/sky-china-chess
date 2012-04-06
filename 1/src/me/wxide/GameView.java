@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -32,8 +33,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 	private Bitmap pic_chessgrid;
 	private Bitmap 	qizibackground,qizicbackground ;
 	private Bitmap cells[]=new Bitmap[14];
-	
-	private Bitmap pic_win,pic_lost;
+	private Bitmap pic_win,pic_lost;	//胜利和失败的图片
 	
 	private GameThread game=new GameThread();	//绘图的线程
 	
@@ -72,29 +72,28 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 			pic_win=	BitmapFactory.decodeResource(getResources(), R.drawable.win);//胜利
 			pic_win=	BitmapFactory.decodeResource(getResources(), R.drawable.lost);//失败
 		
-			cells[4] = BitmapFactory.decodeResource(getResources(), R.drawable.heishuai);//黑帅
-			cells[0] = BitmapFactory.decodeResource(getResources(), R.drawable.heiju);//黑车
-			cells[1] = BitmapFactory.decodeResource(getResources(), R.drawable.heima);//黑马
-			cells[5] = BitmapFactory.decodeResource(getResources(), R.drawable.heipao);//黑炮
-			cells[3] = BitmapFactory.decodeResource(getResources(), R.drawable.heishi);//黑士
-			cells[2] = BitmapFactory.decodeResource(getResources(), R.drawable.heixiang);//黑象
-			cells[6] = BitmapFactory.decodeResource(getResources(), R.drawable.heibing);//黑兵
+			cells[11] = BitmapFactory.decodeResource(getResources(), R.drawable.heishuai);//黑帅
+			cells[7] = BitmapFactory.decodeResource(getResources(), R.drawable.heiju);//黑车
+			cells[8] = BitmapFactory.decodeResource(getResources(), R.drawable.heima);//黑马
+			cells[12] = BitmapFactory.decodeResource(getResources(), R.drawable.heipao);//黑炮
+			cells[10] = BitmapFactory.decodeResource(getResources(), R.drawable.heishi);//黑士
+			cells[9] = BitmapFactory.decodeResource(getResources(), R.drawable.heixiang);//黑象
+			cells[13] = BitmapFactory.decodeResource(getResources(), R.drawable.heibing);//黑兵
 			
-			cells[11] = BitmapFactory.decodeResource(getResources(), R.drawable.hongjiang);//红将
-			cells[7] = BitmapFactory.decodeResource(getResources(), R.drawable.hongju);//红车
-			cells[8] = BitmapFactory.decodeResource(getResources(), R.drawable.hongma);//红马
-			cells[12] = BitmapFactory.decodeResource(getResources(), R.drawable.hongpao);//红砲
-			cells[10] = BitmapFactory.decodeResource(getResources(), R.drawable.hongshi);//红仕
-			cells[9] = BitmapFactory.decodeResource(getResources(), R.drawable.hongxiang);//红相
-			cells[13] = BitmapFactory.decodeResource(getResources(), R.drawable.hongzu);//红卒
+			cells[4] = BitmapFactory.decodeResource(getResources(), R.drawable.hongjiang);//红将
+			cells[0] = BitmapFactory.decodeResource(getResources(), R.drawable.hongju);//红车
+			cells[1] = BitmapFactory.decodeResource(getResources(), R.drawable.hongma);//红马
+			cells[5] = BitmapFactory.decodeResource(getResources(), R.drawable.hongpao);//红砲
+			cells[3] = BitmapFactory.decodeResource(getResources(), R.drawable.hongshi);//红仕
+			cells[2] = BitmapFactory.decodeResource(getResources(), R.drawable.hongxiang);//红相
+			cells[6] = BitmapFactory.decodeResource(getResources(), R.drawable.hongzu);//红卒
 			
 		qizibackground = BitmapFactory.decodeResource(getResources(), R.drawable.qizi);//棋子的背景
 		qizicbackground=BitmapFactory.decodeResource(getResources(), R.drawable.qizic);
 		pic_backgroud = BitmapFactory.decodeResource(getResources(), R.drawable.bacnground);
 		pic_chessgrid = BitmapFactory.decodeResource(getResources(), R.drawable.qipan);
 		
-		
-		
+	
 	}
 	
 public Queue<String> queue= new ConcurrentLinkedQueue<String>();
@@ -131,7 +130,11 @@ public Queue<String> queue= new ConcurrentLinkedQueue<String>();
 	 
 	return true;
 }
-	
+	/**
+	 * 绘图线程
+	 * @author f
+	 *
+	 */
 class GameThread extends Thread{
 	public GameThread(){
 		Log.v("GameThread", "constructor!");
@@ -171,14 +174,11 @@ class GameThread extends Thread{
 	}
 	
 	
-
-	
 	private int i=0;
 	
 	public void draw(){
 		
 		if(AbsActivity.isClientClose()) toastMsg("客户端已断开！");
-		//Log.v("DRAW", "Draw "+i++);
 		Canvas c=this.holder.lockCanvas();
 		c.drawBitmap(pic_backgroud, 0, 0, null);
 		c.drawBitmap(pic_chessgrid, 10,10,  null);
@@ -190,7 +190,8 @@ class GameThread extends Thread{
 			
 			for(int i=0;i<9;i++)
 				for(int j=0;j<10;j++){
-					int index=qipan.data[i][j];
+					int 	index=qipan.data[i][j];
+					//if(!AbsActivity.redSide)	index=qipan.data[i][9-j];
 					if(index==0)	continue;
 					if(qipan.isHasSource()&&qipan.isTheSource(i, j))	c.drawBitmap(qizicbackground, (i*34+10)*zoom,( j*34+13)*zoom, null);
 					else c.drawBitmap(qizibackground, (i*34+10)*zoom, (j*34+13)*zoom, null);
@@ -198,12 +199,7 @@ class GameThread extends Thread{
 					c.drawBitmap(cells[getReourceid(index)], (i*34+12)*zoom, (j*34+13)*zoom, null);
 
 				}
-			/*if( getWin()>0)	{
-				c.drawBitmap(pic_win, (150+12)*zoom, (200+13)*zoom, null);
-			}
-			if( getWin()<0)	{
-				c.drawBitmap(pic_lost, (150+12)*zoom, (200+13)*zoom, null);
-			}*/
+			
 		
 		this.holder.unlockCanvasAndPost(c);
 	}
@@ -227,12 +223,7 @@ private int getWin(){
 }
 
 private float zoom=1f;
-@Override
-public void surfaceChanged(SurfaceHolder holder, int format, int width,
-		int height) {
-	// TODO Auto-generated method stub
-	
-}
+
 
 @Override
 public boolean onTouchEvent(MotionEvent event) {
@@ -241,30 +232,34 @@ public boolean onTouchEvent(MotionEvent event) {
 		System.out.println("TouchEvent");
 		int x=(int) ((event.getX()-12)/(34*zoom));
 		int y=(int) ((event.getY()-13)/(35*zoom));
-		Log.v("x:y", "x:"+x+"__"+y);
-		qipan.selectPlace(x, y);
-		try {
-			System.out.println("clientis:"+activity.client.isClosed());
-			if(!activity.sendMsg(String.format("M%d%d", x,y)))	Log.v("sendMsg", "fail!") ;
-				
-		
-		
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(x>=0&&x<9&&y>=0&&y<10){
+			qipan.selectPlace(x, y);
+			try {
+				System.out.println("clientis:"+activity.client.isClosed());
+				if(!activity.sendMsg(String.format("M%d%d", x,y)))	Log.v("sendMsg", "fail!") ;
+					
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
-	}
+	}//if end
 	else{
-		toastMsg("还没轮到你呢!");
+		toastMsg("还没轮到你呢!",true);
 	}
 	// TODO Auto-generated method stub
-	return super.onTouchEvent(event);
+	return true;
+	//return super.onTouchEvent(event);
 }
 
 private void toastMsg(String msg){
 	Toast t=Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT);
 	t.show();
 }
+public void toastMsg(String msg,boolean flag){
+	if(flag)	Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
+	
+}   	
 public void myDraw(){
 	if(!game.isAlive()){	//如果DrawThread没有启动，就启动这个线程
 		game=new GameThread(this.holder);
@@ -273,6 +268,12 @@ public void myDraw(){
 	
 }
 
+@Override
+public void surfaceChanged(SurfaceHolder holder, int format, int width,
+		int height) {
+	// TODO Auto-generated method stub
+	
+}
 @Override
 public void surfaceCreated(SurfaceHolder holder) {
 

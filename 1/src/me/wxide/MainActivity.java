@@ -32,33 +32,41 @@ public class MainActivity extends AbsActivity {
       this.setContentView(R.layout.main);
       this.button01=(Button) this.findViewById(R.id.button1);
       this.button02=(Button) this.findViewById(R.id.button2);
-     // this.button03=(Button) this.findViewById(R.id.button3);
       this.et01=(TextView) this.findViewById(R.id.textView1);
+      
       this.currentIp=this.getIp();
       
       this.et01.setText("我的IP:"+currentIp);
 
+     initListen();
      
-      button02.setOnClickListener(new View.OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-			startActivity(new Intent(MainActivity.this,JoinActivity.class));
-		}
-	});
-      
-      //建立游戏
-      this.button01.setOnClickListener(new View.OnClickListener() {
-		@Override
-		public void onClick(View arg0) {
-			// TODO Auto-generated method stub
-			startActivity(new Intent(MainActivity.this,ReadyActivity.class));
-		}
-	});
     }
-    
+    /**
+     * 	设置2个button的监听事件
+     */
+    public void initListen(){
+    	 button02.setOnClickListener(new View.OnClickListener() {
+    			
+    			@Override
+    			public void onClick(View v) {
+    				// TODO Auto-generated method stub
+    				startActivity(new Intent(MainActivity.this,JoinActivity.class));
+    			}
+    		});
+    	      
+    	      //建立游戏
+    	      this.button01.setOnClickListener(new View.OnClickListener() {
+    			@Override
+    			public void onClick(View arg0) {
+    				// TODO Auto-generated method stub
+    				startActivity(new Intent(MainActivity.this,ReadyActivity.class));
+    			}
+    		});
+    	
+    }
 
 
    
 }
+
+
